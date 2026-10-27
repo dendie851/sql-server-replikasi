@@ -1,0 +1,42 @@
+services:
+  sql_primary:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sql_primary_server
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=PasswordUtama123!
+      - MSSQL_PID=Developer
+    ports:
+      - "1434:1433"   # Port laptop 1434 diteruskan ke port 1433 container Primary
+    restart: unless-stopped
+    volumes:
+      - primary_data:/var/opt/mssql
+
+  sql_secondary:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sql_secondary_server
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=PasswordCadangan123!
+      - MSSQL_PID=Developer
+    ports:
+      - "1435:1433"   # Port laptop 1435 diteruskan ke port 1433 container Secondary
+    restart: unless-stopped
+    volumes:
+      - secondary_data:/var/opt/mssql
+
+  sql_lb:
+    image: haproxy:latest
+    container_name: sql_load_balancer
+    ports:
+      - "1433:1433"   # Tetap di port 1433 untuk Load Balancer utama (jika ingin diakses lewat satu pintu)
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - sql_primary
+      - sql_secondary
+    restart: unless-stopped
+
+volumes:
+  primary_data:
+  secondary_data:

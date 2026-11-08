@@ -25,18 +25,6 @@ services:
     volumes:
       - secondary_data:/var/opt/mssql
 
-  sql_lb:
-    image: haproxy:latest
-    container_name: sql_load_balancer
-    ports:
-      - "1433:1433"   # Tetap di port 1433 untuk Load Balancer utama (jika ingin diakses lewat satu pintu)
-    volumes:
-      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
-    depends_on:
-      - sql_primary
-      - sql_secondary
-    restart: unless-stopped
-
 volumes:
   primary_data:
   secondary_data:
